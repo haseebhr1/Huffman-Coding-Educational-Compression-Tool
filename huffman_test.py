@@ -1,0 +1,80 @@
+import huffman
+import time
+
+def run_test(input_file, csv_file):
+    print("=== huffman Compression Test ===")
+    print("Input file:", input_file)
+
+    # -------------------------------
+    # Step 1: Compression timing
+    # -------------------------------
+    t1 = time.time()
+    compressed = huffman.compress(input_file)
+    t2 = time.time()
+    compress_time = t2 - t1
+
+    # -------------------------------
+    # Step 2: Decompression timing
+    # -------------------------------
+    t3 = time.time()
+    restored = huffman.decompress(compressed)
+    t4 = time.time()
+    decompress_time = t4 - t3
+
+    # -------------------------------
+    # Step 3: Read files
+    # -------------------------------
+    with open(input_file, "r", encoding="utf-8") as f:
+        original_text = f.read()
+
+    with open(restored, "r", encoding="utf-8") as f:
+        restored_text = f.read()
+
+    # -------------------------------
+    # Step 4: Compute metrics
+    # -------------------------------
+    original_size = len(original_text.encode("utf-8"))
+    compressed_size = len(open(compressed, "rb").read())
+    match = (original_text == restored_text)
+    ratio = compressed_size / original_size if original_size > 0 else 1.0
+    total_time = compress_time + decompress_time
+
+    # -------------------------------
+    # Step 5: Append results to CSV
+    # -------------------------------
+    with open(csv_file, "a", encoding="utf-8") as f:
+        f.write(
+            f"{input_file},"
+            f"{compressed},"
+            f"{restored},"
+            f"{original_size},"
+            f"{compressed_size},"
+            f"{ratio:.4f},"
+            f"{compress_time:.6f},"
+            f"{decompress_time:.6f},"
+            f"{total_time:.6f},"
+            f"{'PASS' if match else 'FAIL'}\n"
+        )
+
+    # -------------------------------
+    # Step 6: Print summary
+    # -------------------------------
+    print("Compressed file:", compressed)
+    print("Restored file:", restored)
+    print("Match:", match)
+    print("Original size:", original_size, "bytes")
+    print("Compressed size:", compressed_size, "bytes")
+    print("Compression ratio:", ratio)
+    print("Compression time:", compress_time, "seconds")
+    print("Decompression time:", decompress_time, "seconds")
+    print("Total time:", total_time, "seconds")
+    print("================================\n")
+
+
+# Create CSV header
+with open("../Others/results.csv", "w", encoding="utf-8") as f:
+    f.write("input,compressed,restored,original_bytes,compressed_bytes,ratio,compress_time,decompress_time,total_time,result\n")
+
+# Run tests
+run_test("test1.txt", "results.csv")
+run_test("test2.txt", "results.csv")
